@@ -3,17 +3,13 @@ if(WIN32)
     set(WIN32_BUILTIN BUILTIN)
 endif()
 
-set(PY3_BUILTIN )
-set(PY3_ALWAYS_BUILTIN )
-if(IS_PY3)
-    set(PY3_BUILTIN BUILTIN)
-    set(PY3_ALWAYS_BUILTIN ALWAYS_BUILTIN)
-endif()
+set(PY3_BUILTIN BUILTIN)
+set(PY3_ALWAYS_BUILTIN ALWAYS_BUILTIN)
 
 add_python_extension(array ${WIN32_BUILTIN} SOURCES arraymodule.c)
-add_python_extension(audioop ${WIN32_BUILTIN} REQUIRES HAVE_LIBM SOURCES audioop.c LIBRARIES ${M_LIBRARIES})
+# add_python_extension(audioop ${WIN32_BUILTIN} REQUIRES HAVE_LIBM SOURCES audioop.c LIBRARIES ${M_LIBRARIES})
 add_python_extension(_bisect ${WIN32_BUILTIN} SOURCES _bisectmodule.c)
-add_python_extension(cmath REQUIRES HAVE_LIBM ${WIN32_BUILTIN} SOURCES _math.c cmathmodule.c LIBRARIES ${M_LIBRARIES})
+add_python_extension(cmath REQUIRES HAVE_LIBM ${WIN32_BUILTIN} SOURCES cmathmodule.c LIBRARIES ${M_LIBRARIES})
 add_python_extension(_codecs_cn ${WIN32_BUILTIN} SOURCES cjkcodecs/_codecs_cn.c)
 add_python_extension(_codecs_hk ${WIN32_BUILTIN} SOURCES cjkcodecs/_codecs_hk.c)
 add_python_extension(_codecs_iso2022 ${WIN32_BUILTIN} SOURCES cjkcodecs/_codecs_iso2022.c)
@@ -22,11 +18,11 @@ add_python_extension(_codecs_kr ${WIN32_BUILTIN} SOURCES cjkcodecs/_codecs_kr.c)
 add_python_extension(_codecs_tw ${WIN32_BUILTIN} SOURCES cjkcodecs/_codecs_tw.c)
 add_python_extension(_collections ${WIN32_BUILTIN} ${PY3_BUILTIN} SOURCES _collectionsmodule.c) # Container types
 add_python_extension(cPickle ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES cPickle.c)
-set(crypt2_NAME crypt)
-set(crypt2_SOURCES cryptmodule.c)
-set(crypt3_NAME _crypt)
-set(crypt3_SOURCES _cryptmodule.c)
-add_python_extension(${crypt${PY_VERSION_MAJOR}_NAME} REQUIRES HAVE_LIBCRYPT SOURCES ${crypt${PY_VERSION_MAJOR}_SOURCES} LIBRARIES ${HAVE_LIBCRYPT})
+# set(crypt2_NAME crypt)
+# set(crypt2_SOURCES cryptmodule.c)
+# set(crypt3_NAME _crypt)
+# set(crypt3_SOURCES _cryptmodule.c)
+# add_python_extension(${crypt${PY_VERSION_MAJOR}_NAME} REQUIRES HAVE_LIBCRYPT SOURCES ${crypt${PY_VERSION_MAJOR}_SOURCES} LIBRARIES ${HAVE_LIBCRYPT})
 add_python_extension(cStringIO ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES cStringIO.c)
 add_python_extension(_csv ${WIN32_BUILTIN} SOURCES _csv.c)
 add_python_extension(_ctypes_test NEVER_BUILTIN REQUIRES HAVE_LIBM SOURCES _ctypes/_ctypes_test.c LIBRARIES ${M_LIBRARIES})
@@ -68,11 +64,11 @@ add_python_extension(itertools ${WIN32_BUILTIN} ${PY3_BUILTIN} SOURCES itertools
 add_python_extension(_json ${WIN32_BUILTIN} SOURCES _json.c)
 add_python_extension(_locale ${WIN32_BUILTIN} ${PY3_BUILTIN} SOURCES _localemodule.c) # access to ISO C locale support
 add_python_extension(_lsprof ${WIN32_BUILTIN} SOURCES _lsprof.c rotatingtree.c)
-add_python_extension(math ${WIN32_BUILTIN} REQUIRES HAVE_LIBM SOURCES _math.c mathmodule.c LIBRARIES ${M_LIBRARIES})
+add_python_extension(math ${WIN32_BUILTIN} REQUIRES HAVE_LIBM SOURCES mathmodule.c LIBRARIES ${M_LIBRARIES})
 add_python_extension(mmap ${WIN32_BUILTIN} SOURCES mmapmodule.c)
 add_python_extension(_multibytecodec ${WIN32_BUILTIN} SOURCES cjkcodecs/multibytecodec.c)
 add_python_extension(operator ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES operator.c)
-add_python_extension(parser ${WIN32_BUILTIN} SOURCES parsermodule.c)
+# add_python_extension(parser ${WIN32_BUILTIN} SOURCES parsermodule.c)
 add_python_extension(_random ${WIN32_BUILTIN} SOURCES _randommodule.c)
 add_python_extension(strop ${WIN32_BUILTIN} REQUIRES IS_PY2 SOURCES stropmodule.c)
 add_python_extension(_struct ${WIN32_BUILTIN} SOURCES _struct.c)
@@ -82,9 +78,7 @@ set(thread3_NAME _thread)
 set(thread2_SOURCES ${SRC_DIR}/Modules/threadmodule.c)
 set(thread3_SOURCES ${SRC_DIR}/Modules/_threadmodule.c)
 set(thread_REQUIRES)
-if(PY_VERSION VERSION_LESS "3.7")
-  list(APPEND thread_REQUIRES WITH_THREAD)
-endif()
+
 add_python_extension(${thread${PY_VERSION_MAJOR}_NAME} ALWAYS_BUILTIN REQUIRES ${thread_REQUIRES} SOURCES ${thread${PY_VERSION_MAJOR}_SOURCES} DEFINITIONS Py_BUILD_CORE)
 set(time_SOURCES timemodule.c)
 if(PY_VERSION VERSION_EQUAL "3.2")
@@ -100,7 +94,7 @@ add_python_extension(faulthandler ALWAYS_BUILTIN REQUIRES IS_PY3 SOURCES faultha
 add_python_extension(_opcode ${WIN32_BUILTIN} REQUIRES IS_PY3 SOURCES _opcode.c)
 add_python_extension(_operator BUILTIN REQUIRES IS_PY3 SOURCES _operator.c)
 add_python_extension(_pickle ${WIN32_BUILTIN} REQUIRES IS_PY3 SOURCES _pickle.c)
-add_python_extension(_sre BUILTIN SOURCES _sre.c) # Fredrik Lundh's new regular expressions
+# add_python_extension(_sre BUILTIN SOURCES _sre.c) # Fredrik Lundh's new regular expressions
 add_python_extension(_stat BUILTIN REQUIRES IS_PY3 SOURCES _stat.c) # stat.h interface
 add_python_extension(_symtable BUILTIN SOURCES symtablemodule.c)
 # Python PEP-3118 (buffer protocol) test module
@@ -121,11 +115,6 @@ add_python_extension(xxlimited REQUIRES IS_PY3 BUILD_TESTING
     NO_INSTALL
 )
 add_python_extension(xxsubtype BUILTIN SOURCES xxsubtype.c)
-if(PY_VERSION VERSION_LESS "3.8")
-# The zipimport module is always imported at startup. Having it as a
-# builtin module avoids some bootstrapping problems and reduces overhead.
-add_python_extension(zipimport ALWAYS_BUILTIN SOURCES zipimport.c DEFINITIONS Py_BUILD_CORE)
-endif()
 
 # Python 3.6
 if(PY_VERSION VERSION_GREATER_EQUAL "3.6")
@@ -138,7 +127,7 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.6")
         _blake2/blake2s_impl.c
     )
     add_python_extension(_blake2 ${WIN32_BUILTIN} SOURCES ${_blake2_SOURCES})
-    add_python_extension(_sha3 ${WIN32_BUILTIN} SOURCES _sha3/sha3module.c)
+    # add_python_extension(_sha3 ${WIN32_BUILTIN} SOURCES sha3module.c)
     add_python_extension(_testconsole ${WIN32_BUILTIN} REQUIRES WIN32 SOURCES ../PC/_testconsole.c)
 endif()
 
@@ -159,37 +148,37 @@ if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
 endif()
 
 # Python 3.9
-if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
-    add_python_extension(_peg_parser ALWAYS_BUILTIN SOURCES _peg_parser.c)
-endif()
+# if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
+#     add_python_extension(_peg_parser ALWAYS_BUILTIN SOURCES _peg_parser.c)
+# endif()
 
 # UNIX-only extensions
 add_python_extension(fcntl REQUIRES UNIX SOURCES fcntlmodule.c)
 add_python_extension(grp REQUIRES UNIX SOURCES grpmodule.c)
 
-set(nis_REQUIRES UNIX HAVE_LIBNSL)
-set(nis_LIBRARIES ${HAVE_LIBNSL})
-set(nis_INCLUDEDIRS )
-if(TIRPC_LIBRARY AND TIRPC_RPC_INCLUDE_PATH)
-    # if rpc.h is provided by libtirpc (instead of being provided by glibc). See python/cpython#5137
-    list(APPEND nis_LIBRARIES ${TIRPC_LIBRARY})
-    list(APPEND nis_INCLUDEDIRS ${TIRPC_RPC_INCLUDE_PATH}/../)
-    if(WITH_STATIC_DEPENDENCIES AND TIRPC_LIBRARY_STATIC_DEPENDENCY_REQUIRED)
-        list(APPEND nis_REQUIRES TIRPC_STATIC_LIBRARIES)
-        list(APPEND nis_LIBRARIES ${TIRPC_STATIC_LIBRARIES})
-    endif()
-endif()
-add_python_extension(nis
-    REQUIRES ${nis_REQUIRES}
-    SOURCES nismodule.c
-    LIBRARIES ${nis_LIBRARIES}
-    INCLUDEDIRS ${nis_INCLUDEDIRS}
-)
+# set(nis_REQUIRES UNIX HAVE_LIBNSL)
+# set(nis_LIBRARIES ${HAVE_LIBNSL})
+# set(nis_INCLUDEDIRS )
+# if(TIRPC_LIBRARY AND TIRPC_RPC_INCLUDE_PATH)
+#     # if rpc.h is provided by libtirpc (instead of being provided by glibc). See python/cpython#5137
+#     list(APPEND nis_LIBRARIES ${TIRPC_LIBRARY})
+#     list(APPEND nis_INCLUDEDIRS ${TIRPC_RPC_INCLUDE_PATH}/../)
+#     if(WITH_STATIC_DEPENDENCIES AND TIRPC_LIBRARY_STATIC_DEPENDENCY_REQUIRED)
+#         list(APPEND nis_REQUIRES TIRPC_STATIC_LIBRARIES)
+#         list(APPEND nis_LIBRARIES ${TIRPC_STATIC_LIBRARIES})
+#     endif()
+# endif()
+# add_python_extension(nis
+#     REQUIRES ${nis_REQUIRES}
+#     SOURCES nismodule.c
+#     LIBRARIES ${nis_LIBRARIES}
+#     INCLUDEDIRS ${nis_INCLUDEDIRS}
+# )
 
 add_python_extension(posix REQUIRES UNIX ALWAYS_BUILTIN SOURCES posixmodule.c DEFINITIONS Py_BUILD_CORE)
 add_python_extension(pwd REQUIRES UNIX BUILTIN SOURCES pwdmodule.c) # this is needed to find out the user's home dir if $HOME is not set
 add_python_extension(resource REQUIRES UNIX SOURCES resource.c)
-add_python_extension(spwd REQUIRES UNIX HAVE_GETSPNAM HAVE_GETSPENT SOURCES spwdmodule.c)
+# add_python_extension(spwd REQUIRES UNIX HAVE_GETSPNAM HAVE_GETSPENT SOURCES spwdmodule.c)
 add_python_extension(syslog REQUIRES UNIX SOURCES syslogmodule.c)
 add_python_extension(termios REQUIRES UNIX SOURCES termios.c)
 
@@ -208,7 +197,7 @@ add_python_extension(_scproxy
 
 # Linux-only extensions
 add_python_extension(linuxaudiodev REQUIRES LINUX IS_PY2 SOURCES linuxaudiodev.c)
-add_python_extension(ossaudiodev REQUIRES LINUX SOURCES ossaudiodev.c)
+# add_python_extension(ossaudiodev REQUIRES LINUX SOURCES ossaudiodev.c)
 
 # Python 3.8: UNIX-only extensions
 if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
@@ -246,7 +235,7 @@ set(module_src ${SRC_DIR}/PC/_findvs.cpp)
 if(EXISTS ${module_src})
   set(HAS_DISTUTILS_FINDVS_MODULE_SRC 1)
 endif()
-add_python_extension(_distutils_findvs REQUIRES WIN32 IS_PY3 HAS_DISTUTILS_FINDVS_MODULE_SRC SOURCES ${module_src})
+# add_python_extension(_distutils_findvs REQUIRES WIN32 IS_PY3 HAS_DISTUTILS_FINDVS_MODULE_SRC SOURCES ${module_src})
 
 # Multiprocessing is different on unix and windows
 if(UNIX)
@@ -260,9 +249,7 @@ if(UNIX)
         )
     endif()
     set(_multiprocessing_REQUIRES)
-    if(PY_VERSION VERSION_LESS "3.7")
-      list(APPEND _multiprocessing_REQUIRES WITH_THREAD)
-    endif()
+
     add_python_extension(_multiprocessing
         SOURCES _multiprocessing/multiprocessing.c
                 ${_multiprocessing${PY_VERSION_MAJOR}_SOURCES}
@@ -302,9 +289,6 @@ if(WIN32)
         LIBRARIES ws2_32 ${M_LIBRARIES} $<$<VERSION_GREATER_EQUAL:${PY_VERSION},3.8>:iphlpapi>
     )
 else()
-    if(PY_VERSION VERSION_GREATER_EQUAL "2.7.4" AND PY_VERSION VERSION_LESS "3")
-    list(APPEND _socket_SOURCES timemodule.c)
-    endif()
     add_python_extension(_socket
         REQUIRES HAVE_LIBM
         SOURCES ${_socket_SOURCES}
@@ -528,13 +512,6 @@ if(HAVE_GLIBC_MEMMOVE_BUG)
 #    undef_macros.append('_FORTIFY_SOURCE')
 endif()
 
-if(NOT WITH_THREAD AND PY_VERSION VERSION_LESS "3.7")
-    # Faster version without thread local contexts:
-    list(APPEND libmpdec_config_${libmpdec_config}
-        WITHOUT_THREADS
-    )
-endif()
-
 if(WIN32)
     list(APPEND libmpdec_config_${libmpdec_config}
         _CRT_SECURE_NO_WARNINGS MASM
@@ -611,31 +588,13 @@ else()
     )
 endif()
 
-if(IS_PY2)
-
-# If openssl is NOT available then build some other hash implementations on UNIX
-set(HASH_NOT_AVAILABLE ON)
-if(NOT WIN32 AND OPENSSL_LIBRARIES)
-  set(HASH_NOT_AVAILABLE OFF)
-endif()
-
-add_python_extension(_md5 REQUIRES HASH_NOT_AVAILABLE ${WIN32_BUILTIN} SOURCES md5.c md5module.c)
-add_python_extension(_sha REQUIRES HASH_NOT_AVAILABLE ${WIN32_BUILTIN} SOURCES shamodule.c)
-add_python_extension(_sha256 REQUIRES HASH_NOT_AVAILABLE ${WIN32_BUILTIN} SOURCES sha256module.c)
-add_python_extension(_sha512 REQUIRES HASH_NOT_AVAILABLE ${WIN32_BUILTIN} SOURCES sha512module.c)
-
-else()
-
 # We always compile these even when OpenSSL is available (issue #14693).
 # It's harmless and the object code is tiny (40-50 KB per module,
 # only loaded when actually used).
 add_python_extension(_md5 ${WIN32_BUILTIN} SOURCES md5module.c)
 add_python_extension(_sha1 ${WIN32_BUILTIN} SOURCES sha1module.c)
-add_python_extension(_sha256 ${WIN32_BUILTIN} SOURCES sha256module.c)
-add_python_extension(_sha512 ${WIN32_BUILTIN} SOURCES sha512module.c)
-
-endif()
-
+add_python_extension(_sha2 ${WIN32_BUILTIN} SOURCES sha2module.c)
+add_python_extension(_sha3 ${WIN32_BUILTIN} SOURCES sha3module.c)
 
 # Extensions that depend on other libraries
 set(binascii_REQUIRES "")
@@ -656,12 +615,12 @@ add_python_extension(binascii
     LIBRARIES ${binascii_LIBRARIES}
     INCLUDEDIRS ${binascii_INCLUDEDIRS}
 )
-add_python_extension(_bsddb
-    REQUIRES IS_PY2 DB_INCLUDE_PATH DB_LIBRARY
-    SOURCES _bsddb.c
-    LIBRARIES ${DB_LIBRARIES}
-    INCLUDEDIRS ${DB_INCLUDE_PATH}
-)
+# add_python_extension(_bsddb
+#     REQUIRES IS_PY2 DB_INCLUDE_PATH DB_LIBRARY
+#     SOURCES _bsddb.c
+#     LIBRARIES ${DB_LIBRARIES}
+#     INCLUDEDIRS ${DB_INCLUDE_PATH}
+# )
 set(bz2_2_NAME bz2)
 set(bz2_3_NAME _bz2)
 add_python_extension(${bz2_${PY_VERSION_MAJOR}_NAME}
@@ -688,11 +647,7 @@ add_python_extension(_curses
 )
 set(dbm2_SOURCES dbmmodule.c)
 set(dbm3_SOURCES _dbmmodule.c)
-if(IS_PY3)
-  set(dbm_name _dbm)
-else()
-  set(dbm_name dbm)
-endif()
+set(dbm_name _dbm)
 add_python_extension(${dbm_name}
     REQUIRES NDBM_TAG GDBM_LIBRARY GDBM_COMPAT_LIBRARY
     SOURCES ${dbm${PY_VERSION_MAJOR}_SOURCES}
@@ -702,11 +657,7 @@ add_python_extension(${dbm_name}
 )
 set(gdbm2_SOURCES gdbmmodule.c)
 set(gdbm3_SOURCES _gdbmmodule.c)
-if(IS_PY3)
-  set(gdbm_name _gdbm)
-else()
-  set(gdbm_name gdbm)
-endif()
+set(gdbm_name _gdbm)
 add_python_extension(${gdbm_name}
     REQUIRES GDBM_INCLUDE_PATH GDBM_LIBRARY GDBM_COMPAT_LIBRARY
     SOURCES ${gdbm${PY_VERSION_MAJOR}_SOURCES}

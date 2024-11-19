@@ -26,7 +26,7 @@ if(UNIX)
       )
 elseif(WIN32)
     list(APPEND MODULE_SOURCES
-        ${SRC_DIR}/PC/getpathp.c
+        ${SRC_DIR}/Modules/getpath.c
     )
     # HACK To workaround limitation in escaping logic of CMake, the pythonpath
     #      separator is conditionally set depending of the version of Visual Studio.
@@ -53,13 +53,10 @@ elseif(WIN32)
         set(PYTHONPATH "${PYTHONPATH}${PATHSEP}.\\\\${PYTHONHOME_ESCAPED}\\\\lib-tk")
     endif()
 
-    set(_wide_char_modifier)
-    if(IS_PY3)
-        set(_wide_char_modifier "L")
-    endif()
+    set(_wide_char_modifier "L")
 
     set_property(
-        SOURCE ${SRC_DIR}/PC/getpathp.c
+        SOURCE ${SRC_DIR}/Modules/getpath.c
         PROPERTY COMPILE_DEFINITIONS
             "LANDMARK=${_wide_char_modifier}\"${PYTHONHOME_ESCAPED}\\\\os.py\""
             "PYTHONPATH=${_wide_char_modifier}\"${PYTHONPATH}\""
@@ -68,74 +65,38 @@ elseif(WIN32)
 endif()
 
 set(PARSER_COMMON_SOURCES # Equivalent to POBJS in Makefile.pre
-    ${SRC_DIR}/Parser/acceler.c
-    ${SRC_DIR}/Parser/grammar1.c
-    ${SRC_DIR}/Parser/listnode.c
-    ${SRC_DIR}/Parser/node.c
+    ${SRC_DIR}/Parser/action_helpers.c
+    ${SRC_DIR}/Parser/lexer/buffer.c
+    ${SRC_DIR}/Parser/lexer/buffer.h
+    ${SRC_DIR}/Parser/lexer/lexer.c
+    ${SRC_DIR}/Parser/lexer/lexer.h
+    ${SRC_DIR}/Parser/lexer/state.c
+    ${SRC_DIR}/Parser/lexer/state.h
+    ${SRC_DIR}/Parser/myreadline.c
     ${SRC_DIR}/Parser/parser.c
+    ${SRC_DIR}/Parser/peg_api.c
+    ${SRC_DIR}/Parser/pegen.c
+    ${SRC_DIR}/Parser/pegen.h
+    ${SRC_DIR}/Parser/pegen_errors.c
+    ${SRC_DIR}/Parser/string_parser.c
+    ${SRC_DIR}/Parser/string_parser.h
+    ${SRC_DIR}/Parser/token.c
+    ${SRC_DIR}/Parser/tokenizer/file_tokenizer.c
+    ${SRC_DIR}/Parser/tokenizer/helpers.c
+    ${SRC_DIR}/Parser/tokenizer/helpers.h
+    ${SRC_DIR}/Parser/tokenizer/readline_tokenizer.c
+    ${SRC_DIR}/Parser/tokenizer/string_tokenizer.c
+    ${SRC_DIR}/Parser/tokenizer/tokenizer.h
+    ${SRC_DIR}/Parser/tokenizer/utf8_tokenizer.c
 )
-if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
-    list(APPEND PARSER_COMMON_SOURCES
-        ${SRC_DIR}/Parser/pegen/pegen.c
-        ${SRC_DIR}/Parser/pegen/parse.c
-        ${SRC_DIR}/Parser/pegen/parse_string.c
-        ${SRC_DIR}/Parser/pegen/peg_api.c
-    )
-endif()
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-    list(APPEND PARSER_COMMON_SOURCES
-        ${SRC_DIR}/Parser/myreadline.c
-        ${SRC_DIR}/Parser/parsetok.c
-        ${SRC_DIR}/Parser/token.c
-        ${SRC_DIR}/Parser/tokenizer.c
-    )
-else()
-    list(APPEND PARSER_COMMON_SOURCES
-        ${SRC_DIR}/Parser/bitset.c
-        ${SRC_DIR}/Parser/firstsets.c
-        ${SRC_DIR}/Parser/grammar.c
-        ${SRC_DIR}/Parser/metagrammar.c
-        ${SRC_DIR}/Parser/pgen.c
-    )
-endif()
-
-set(OBJECT2_SOURCES
-    ${SRC_DIR}/Objects/bufferobject.c
-    ${SRC_DIR}/Objects/cobject.c
-    ${SRC_DIR}/Objects/intobject.c
-    ${SRC_DIR}/Objects/stringobject.c
-)
-if(MSVC)
-    if(EXISTS ${SRC_DIR}/PC/invalid_parameter_handler.c)
-        list(APPEND OBJECT2_SOURCES
-            ${SRC_DIR}/PC/invalid_parameter_handler.c
-        )
-    endif()
-endif()
-
-set(OBJECT3_SOURCES
-    ${SRC_DIR}/Objects/accu.c
-    ${SRC_DIR}/Objects/bytesobject.c
-    ${SRC_DIR}/Objects/namespaceobject.c
-    ${SRC_DIR}/Objects/odictobject.c
-)
-if(MSVC)
-    list(APPEND OBJECT3_SOURCES
-        ${SRC_DIR}/PC/invalid_parameter_handler.c
-    )
-endif()
-if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
-    list(APPEND OBJECT3_SOURCES
-        ${SRC_DIR}/Objects/call.c
-    )
-endif()
 
 set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
-    ${OBJECT${PY_VERSION_MAJOR}_SOURCES}
     ${SRC_DIR}/Objects/abstract.c
     ${SRC_DIR}/Objects/boolobject.c
     ${SRC_DIR}/Objects/bytearrayobject.c
     ${SRC_DIR}/Objects/bytes_methods.c
+    ${SRC_DIR}/Objects/bytesobject.c
+    ${SRC_DIR}/Objects/call.c
     ${SRC_DIR}/Objects/capsule.c
     ${SRC_DIR}/Objects/cellobject.c
     ${SRC_DIR}/Objects/classobject.c
@@ -149,6 +110,7 @@ set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
     ${SRC_DIR}/Objects/floatobject.c
     ${SRC_DIR}/Objects/frameobject.c
     ${SRC_DIR}/Objects/funcobject.c
+    ${SRC_DIR}/Objects/genericaliasobject.c
     ${SRC_DIR}/Objects/genobject.c
     ${SRC_DIR}/Objects/iterobject.c
     ${SRC_DIR}/Objects/listobject.c
@@ -156,21 +118,33 @@ set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
     ${SRC_DIR}/Objects/memoryobject.c
     ${SRC_DIR}/Objects/methodobject.c
     ${SRC_DIR}/Objects/moduleobject.c
+    ${SRC_DIR}/Objects/namespaceobject.c
     ${SRC_DIR}/Objects/object.c
     ${SRC_DIR}/Objects/obmalloc.c
+    ${SRC_DIR}/Objects/odictobject.c
+    ${SRC_DIR}/Objects/picklebufobject.c
     ${SRC_DIR}/Objects/rangeobject.c
     ${SRC_DIR}/Objects/setobject.c
     ${SRC_DIR}/Objects/sliceobject.c
+    ${SRC_DIR}/Objects/stringlib/count.h
+    ${SRC_DIR}/Objects/stringlib/fastsearch.h
+    ${SRC_DIR}/Objects/stringlib/find.h
+    ${SRC_DIR}/Objects/stringlib/partition.h
+    ${SRC_DIR}/Objects/stringlib/replace.h
+    ${SRC_DIR}/Objects/stringlib/split.h
     ${SRC_DIR}/Objects/structseq.c
     ${SRC_DIR}/Objects/tupleobject.c
     ${SRC_DIR}/Objects/typeobject.c
+    ${SRC_DIR}/Objects/typevarobject.c
     ${SRC_DIR}/Objects/unicodectype.c
     ${SRC_DIR}/Objects/unicodeobject.c
+    ${SRC_DIR}/Objects/unicodetype_db.h
+    ${SRC_DIR}/Objects/unionobject.c
     ${SRC_DIR}/Objects/weakrefobject.c
 )
 if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
     list(APPEND OBJECT_COMMON_SOURCES
-        ${SRC_DIR}/Objects/interpreteridobject.c
+        # ${SRC_DIR}/Objects/interpreteridobject.c
         ${SRC_DIR}/Objects/picklebufobject.c
     )
 endif()
@@ -193,13 +167,11 @@ if(UNIX AND HAVE_DLOPEN)
     list(APPEND DYNLOAD_SOURCES
         ${SRC_DIR}/Python/dynload_shlib.c
     )
-    if(IS_PY3)
     set_property(
         SOURCE ${SRC_DIR}/Python/dynload_shlib.c
         PROPERTY COMPILE_DEFINITIONS
             SOABI="${SOABI}"
         )
-    endif()
 elseif(WIN32)
     list(APPEND DYNLOAD_SOURCES
         ${SRC_DIR}/PC/dl_nt.c
@@ -224,98 +196,90 @@ if(WITH_THREAD OR PY_VERSION VERSION_GREATER_EQUAL "3.7")
     )
 endif()
 
-set(PYTHON2_COMMON_SOURCES
-    ${SRC_DIR}/Python/formatter_string.c
-    ${SRC_DIR}/Python/pystrtod.c
-)
-if(WIN32)
-    list(APPEND PYTHON2_COMMON_SOURCES
-        ${SRC_DIR}/PC/import_nt.c
-    )
-endif()
-
-set(PYTHON3_COMMON_SOURCES
-    ${SRC_DIR}/Python/dynamic_annotations.c
-    ${SRC_DIR}/Python/fileutils.c
-    ${SRC_DIR}/Python/pyhash.c
-    ${SRC_DIR}/Python/pylifecycle.c
-    ${SRC_DIR}/Python/pystrhex.c
-    ${SRC_DIR}/Python/pystrtod.c
-    ${SRC_DIR}/Python/pytime.c
-)
-
 set(PYTHON_COMMON_SOURCES
     ${DYNLOAD_SOURCES}
-    ${PYTHON${PY_VERSION_MAJOR}_COMMON_SOURCES}
     ${THREAD_SOURCES}
+    ${SRC_DIR}/Python/_warnings.c
     ${SRC_DIR}/Python/asdl.c
+    ${SRC_DIR}/Python/assemble.c
     ${SRC_DIR}/Python/ast.c
+    ${SRC_DIR}/Python/ast_opt.c
+    ${SRC_DIR}/Python/ast_unparse.c
     ${SRC_DIR}/Python/bltinmodule.c
+    ${SRC_DIR}/Python/bootstrap_hash.c
+    ${SRC_DIR}/Python/brc.c
     ${SRC_DIR}/Python/ceval.c
+    ${SRC_DIR}/Python/ceval_gil.c
     ${SRC_DIR}/Python/codecs.c
     ${SRC_DIR}/Python/compile.c
+    ${SRC_DIR}/Python/condvar.h
+    ${SRC_DIR}/Python/context.c
+    ${SRC_DIR}/Python/critical_section.c
     ${SRC_DIR}/Python/dtoa.c
+    ${SRC_DIR}/Python/dynamic_annotations.c
+    ${SRC_DIR}/Python/dynload_win.c
     ${SRC_DIR}/Python/errors.c
+    ${SRC_DIR}/Python/fileutils.c
+    ${SRC_DIR}/Python/flowgraph.c
     ${SRC_DIR}/Python/formatter_unicode.c
+    ${SRC_DIR}/Python/frame.c
+    ${SRC_DIR}/Python/frozen.c
     ${SRC_DIR}/Python/future.c
+    ${SRC_DIR}/Python/gc.c
+    ${SRC_DIR}/Python/gc_free_threading.c
+    ${SRC_DIR}/Python/gc_gil.c
     ${SRC_DIR}/Python/getargs.c
     ${SRC_DIR}/Python/getcompiler.c
     ${SRC_DIR}/Python/getcopyright.c
     ${SRC_DIR}/Python/getopt.c
     ${SRC_DIR}/Python/getplatform.c
     ${SRC_DIR}/Python/getversion.c
-    ${SRC_DIR}/Python/graminit.c
+    ${SRC_DIR}/Python/hamt.c
     ${SRC_DIR}/Python/import.c
     ${SRC_DIR}/Python/importdl.c
+    ${SRC_DIR}/Python/initconfig.c
+    ${SRC_DIR}/Python/interpconfig.c
+    ${SRC_DIR}/Python/jit.c
     ${SRC_DIR}/Python/marshal.c
     ${SRC_DIR}/Python/modsupport.c
     ${SRC_DIR}/Python/mysnprintf.c
     ${SRC_DIR}/Python/mystrtoul.c
-    ${SRC_DIR}/Python/peephole.c
+    ${SRC_DIR}/Python/object_stack.c
+    ${SRC_DIR}/Python/optimizer.c
+    ${SRC_DIR}/Python/optimizer_analysis.c
+    ${SRC_DIR}/Python/optimizer_symbols.c
+    ${SRC_DIR}/Python/parking_lot.c
+    ${SRC_DIR}/Python/pathconfig.c
+    ${SRC_DIR}/Python/perf_jit_trampoline.c
+    ${SRC_DIR}/Python/perf_trampoline.c
+    ${SRC_DIR}/Python/preconfig.c
     ${SRC_DIR}/Python/pyarena.c
     ${SRC_DIR}/Python/pyctype.c
     ${SRC_DIR}/Python/pyfpe.c
+    ${SRC_DIR}/Python/pyhash.c
+    ${SRC_DIR}/Python/pylifecycle.c
     ${SRC_DIR}/Python/pymath.c
     ${SRC_DIR}/Python/pystate.c
     ${SRC_DIR}/Python/pystrcmp.c
+    ${SRC_DIR}/Python/pystrhex.c
+    ${SRC_DIR}/Python/pystrtod.c
     ${SRC_DIR}/Python/Python-ast.c
+    ${SRC_DIR}/Python/Python-tokenize.c
     ${SRC_DIR}/Python/pythonrun.c
+    ${SRC_DIR}/Python/pytime.c
+    ${SRC_DIR}/Python/qsbr.c
+    ${SRC_DIR}/Python/specialize.c
+    ${SRC_DIR}/Python/stdlib_module_names.h
     ${SRC_DIR}/Python/structmember.c
+    ${SRC_DIR}/Python/suggestions.c
     ${SRC_DIR}/Python/symtable.c
     ${SRC_DIR}/Python/sysmodule.c
+    ${SRC_DIR}/Python/thread.c
+    ${SRC_DIR}/Python/thread_nt.h
     ${SRC_DIR}/Python/traceback.c
-    ${SRC_DIR}/Python/_warnings.c
+    ${SRC_DIR}/Python/tracemalloc.c
 )
-if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
-    list(APPEND PYTHON_COMMON_SOURCES
-        ${SRC_DIR}/Python/ast_opt.c
-        ${SRC_DIR}/Python/ast_unparse.c
-        ${SRC_DIR}/Python/bootstrap_hash.c
-        ${SRC_DIR}/Python/context.c
-        ${SRC_DIR}/Python/hamt.c
-        ${SRC_DIR}/Python/pathconfig.c
-    )
-else()
-    list(APPEND PYTHON_COMMON_SOURCES
-        ${SRC_DIR}/Python/random.c
-    )
-endif()
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-    list(APPEND PYTHON_COMMON_SOURCES
-        ${SRC_DIR}/Python/initconfig.c
-        ${SRC_DIR}/Python/preconfig.c
-    )
-endif()
 
-if(UNIX)
-    list(APPEND PYTHON_COMMON_SOURCES
-        ${SRC_DIR}/Python/frozenmain.c
-    )
-else()
-    list(APPEND PYTHON_COMMON_SOURCES
-        ${SRC_DIR}/Python/frozen.c
-    )
-endif()
 
 if(UNIX OR MINGW)
     set_property(
@@ -323,13 +287,11 @@ if(UNIX OR MINGW)
         PROPERTY COMPILE_DEFINITIONS
             PLATFORM="${PY_PLATFORM}"
     )
-    if(IS_PY3)
     set_property(
         SOURCE ${SRC_DIR}/Python/sysmodule.c
         PROPERTY COMPILE_DEFINITIONS
             ABIFLAGS="${ABIFLAGS}"
         )
-    endif()
 endif()
 
 list(APPEND MODULE_SOURCES
@@ -343,13 +305,6 @@ set(LIBPYTHON_OMIT_FROZEN_SOURCES
     ${PARSER_COMMON_SOURCES}
     ${PYTHON_COMMON_SOURCES}
 )
-if(PY_VERSION VERSION_LESS "3.8")
-    list(APPEND LIBPYTHON_OMIT_FROZEN_SOURCES
-        ${SRC_DIR}/Parser/myreadline.c
-        ${SRC_DIR}/Parser/parsetok.c
-        ${SRC_DIR}/Parser/tokenizer.c
-    )
-endif()
 
 # List of builtin extensions
 get_property(builtin_extensions GLOBAL PROPERTY builtin_extensions)
@@ -441,7 +396,7 @@ endif()
 if(UNIX)
     list(APPEND LIBPYTHON_TARGET_LIBRARIES ${LIBUTIL_LIBRARIES} ${M_LIBRARIES})
 endif()
-if(WIN32 AND IS_PY3)
+if(WIN32)
     list(APPEND LIBPYTHON_TARGET_LIBRARIES ws2_32) # Required by signalmodule
     if(PY_VERSION VERSION_GREATER_EQUAL "3.5")
         list(APPEND LIBPYTHON_TARGET_LIBRARIES version) # Required by sysmodule
@@ -459,7 +414,7 @@ if(IS_PY3)
 
 # Build _freeze_importlib executable
 add_executable(_freeze_importlib
-  ${SRC_DIR}/Programs/_freeze_importlib.c
+  ${SRC_DIR}/Programs/_freeze_module.c
   ${LIBPYTHON_OMIT_FROZEN_SOURCES}
   )
 target_link_libraries(_freeze_importlib ${LIBPYTHON_TARGET_LIBRARIES})
@@ -512,30 +467,6 @@ endif()
 # the frozen sources.
 add_custom_target(freeze_modules DEPENDS ${LIBPYTHON_FROZEN_SOURCES})
 
-endif()
-
-if(PY_VERSION VERSION_LESS "3.8")
-# Build pgen executable
-set(PGEN2_SOURCES
-    ${SRC_DIR}/Parser/parsetok.c
-)
-set(PGEN3_SOURCES
-    ${SRC_DIR}/Python/dynamic_annotations.c
-    ${SRC_DIR}/Parser/parsetok_pgen.c
-)
-add_executable(pgen
-    ${PARSER_COMMON_SOURCES}
-    ${PGEN${PY_VERSION_MAJOR}_SOURCES}
-    ${SRC_DIR}/Objects/obmalloc.c
-    ${SRC_DIR}/Python/mysnprintf.c
-    ${SRC_DIR}/Python/pyctype.c
-    ${SRC_DIR}/Parser/tokenizer_pgen.c
-    ${SRC_DIR}/Parser/printgrammar.c
-    ${SRC_DIR}/Parser/pgenmain.c
-)
-if(builtin_compile_definitions_without_py_limited_api)
-  target_compile_definitions(pgen PUBLIC ${builtin_compile_definitions_without_py_limited_api})
-endif()
 endif()
 
 # Collect libpython sources
@@ -601,7 +532,7 @@ if(BUILD_LIBPYTHON_SHARED)
 
     set(targetname "libpython3-shared")
 
-    if(IS_PY3 AND MSVC)
+    if(MSVC)
         # XXX Add BuildPython3_dDef
 
         # Generate 'python3stub.def'
@@ -646,7 +577,7 @@ if(BUILD_LIBPYTHON_SHARED)
         target_link_libraries(${targetname} ${python3stub_lib})
     endif()
 
-    if(IS_PY3 AND UNIX AND NOT APPLE)
+    if(UNIX AND NOT APPLE)
         add_library(${targetname} SHARED ${PROJECT_SOURCE_DIR}/cmake/empty.c)
         set_target_properties(${targetname} PROPERTIES
             LINK_FLAGS "-Wl,--no-as-needed"
