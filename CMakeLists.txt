@@ -248,12 +248,8 @@ if(PYTHON_APPLY_PATCHES)
 endif()
 
 # Convenience boolean variables to easily test python version
-set(IS_PY3 0)
-set(IS_PY2 1)
-if(PY_VERSION_MAJOR VERSION_GREATER 2)
-    set(IS_PY3 1)
-    set(IS_PY2 0)
-endif()
+set(IS_PY3 1)
+set(IS_PY2 0)
 
 # Enable CXX language to support building of _distutils_findvs extension
 if(WIN32)
@@ -270,19 +266,11 @@ if(DEFINED Py_USING_UNICODE)
     message(AUTHOR_WARNING "Py_USING_UNICODE option is *NOT* supported with Python 3. Current version is ${PY_VERSION}")
 endif()
 
-if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
-    option(WITH_C_LOCALE_COERCION "Enable C locale coercion to a UTF-8 based locale" ON)
-else()
-    if(DEFINED WITH_C_LOCALE_COERCION)
-        message(AUTHOR_WARNING "WITH_C_LOCALE_COERCION option is *NOT* supported with Python < 3.7. Current version is ${PY_VERSION}")
-    endif()
-endif()
+option(WITH_C_LOCALE_COERCION "Enable C locale coercion to a UTF-8 based locale" ON)
 
-if(PY_VERSION_MAJOR VERSION_GREATER 2.7.10)
 # See "Improving performance in Python 2.7" - http://lwn.net/Articles/646888/
 option(WITH_COMPUTED_GOTOS "Improve performance enabling the computed goto based dispatch" OFF)
 set(USE_COMPUTED_GOTOS ${WITH_COMPUTED_GOTOS})
-endif()
 
 set(WITH_HASH_ALGORITHM "default" CACHE STRING "Define hash algorithm for str, bytes and memoryview.")
 set_property(CACHE WITH_HASH_ALGORITHM PROPERTY STRINGS "default" "siphash24" "fnv")
@@ -291,7 +279,6 @@ if(DEFINED WITH_THREAD)
     message(AUTHOR_WARNING "WITH_THREAD option is *NOT* supported with Python < 3.7. Current version is ${PY_VERSION}")
 endif()
 
-if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
 set(WITH_SSL_DEFAULT_SUITES "python" CACHE STRING "Override default cipher suites string: python, openssl or a custom string")
 if("${WITH_SSL_DEFAULT_SUITES}" STREQUAL "python")
     set(PY_SSL_DEFAULT_CIPHERS 1)
@@ -302,23 +289,9 @@ else()
     set(PY_SSL_DEFAULT_CIPHER_STRING "${WITH_SSL_DEFAULT_SUITES}")
 endif()
 message(STATUS "Setting PY_SSL_DEFAULT_CIPHER_STRING to '${WITH_SSL_DEFAULT_SUITES}'")
-endif()
 
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-    option(WITH_DECIMAL_CONTEXTVAR "Build _decimal module using a coroutine-local rather than a thread-local context" ON)
-else()
-    if(DEFINED WITH_C_LOCALE_COERCION)
-        message(AUTHOR_WARNING "WITH_DECIMAL_CONTEXTVAR option is *NOT* supported with Python < 3.8. Current version is ${PY_VERSION}")
-    endif()
-endif()
-
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-    option(WITH_TRACE_REFS "Enable tracing references for debugging purpose" OFF)
-else()
-    if(DEFINED WITH_TRACE_REFS)
-        message(AUTHOR_WARNING "WITH_TRACE_REFS option is *NOT* supported with Python < 3.8. Current version is ${PY_VERSION}")
-    endif()
-endif()
+option(WITH_DECIMAL_CONTEXTVAR "Build _decimal module using a coroutine-local rather than a thread-local context" ON)
+option(WITH_TRACE_REFS "Enable tracing references for debugging purpose" OFF)
 
 # This is the major version number of Python
 set(LIBPYTHON_VERSION ${PY_VERSION_MAJOR}.${PY_VERSION_MINOR})
@@ -417,9 +390,7 @@ include_directories(${SRC_DIR}/Python)
 
 # Set cflags used by all components
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
-    if(PY_VERSION VERSION_GREATER_EQUAL "3.6")
-        append_if_absent(CMAKE_C_FLAGS "-std=c99")
-    endif()
+    append_if_absent(CMAKE_C_FLAGS "-std=c99")
     append_if_absent(CMAKE_C_FLAGS "-Wall")
     append_if_absent(CMAKE_C_FLAGS "-Wstrict-prototypes")
     append_if_absent(CMAKE_C_FLAGS "-fno-strict-aliasing")
@@ -487,11 +458,7 @@ add_custom_target(clinic
 )
 
 # Add target to generate 'Include/graminit.h' and 'Python/graminit.c'
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-    set(generate_graminit_command $<TARGET_FILE:python> -m Parser.pgen)
-else()
-    set(generate_graminit_command $<TARGET_FILE:pgen>)
-endif()
+set(generate_graminit_command $<TARGET_FILE:python> -m Parser.pgen)
 add_custom_target(generate_graminit
     COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${generate_graminit_command}
         ${SRC_DIR}/Grammar/Grammar
@@ -510,7 +477,6 @@ add_custom_target(generate_graminit
     VERBATIM
 )
 
-if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
 # Add target to generate `Tools/peg_generator/pegen/grammar_parser.py`
 add_custom_target(generate_pegen_metaparser
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${SRC_DIR}/Tools/peg_generator
@@ -543,7 +509,6 @@ add_custom_target(generate_pegen_parse
     COMMENT "Generating '${SRC_DIR}/Parser/pegen/parse.c'"
     VERBATIM
 )
-endif()
 
 # Add target to generate 'opcode.h' header file
 add_custom_target(generate_opcode_h

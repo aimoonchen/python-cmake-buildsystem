@@ -142,17 +142,14 @@ set(OBJECT_COMMON_SOURCES # Equivalent to OBJECT_OBJS in Makefile.pre
     ${SRC_DIR}/Objects/unionobject.c
     ${SRC_DIR}/Objects/weakrefobject.c
 )
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-    list(APPEND OBJECT_COMMON_SOURCES
-        # ${SRC_DIR}/Objects/interpreteridobject.c
-        ${SRC_DIR}/Objects/picklebufobject.c
-    )
-endif()
-if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
-    list(APPEND OBJECT_COMMON_SOURCES
-        ${SRC_DIR}/Objects/genericaliasobject.c
-    )
-endif()
+
+list(APPEND OBJECT_COMMON_SOURCES
+    # ${SRC_DIR}/Objects/interpreteridobject.c
+    ${SRC_DIR}/Objects/picklebufobject.c
+)
+list(APPEND OBJECT_COMMON_SOURCES
+    ${SRC_DIR}/Objects/genericaliasobject.c
+)
 
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
     foreach(filename class complex float int method string type unicode weakref)
@@ -189,12 +186,9 @@ elseif(WIN32)
         )
 endif()
 
-set(THREAD_SOURCES )
-if(WITH_THREAD OR PY_VERSION VERSION_GREATER_EQUAL "3.7")
-    list(APPEND THREAD_SOURCES
-        ${SRC_DIR}/Python/thread.c
-    )
-endif()
+set(THREAD_SOURCES
+    ${SRC_DIR}/Python/thread.c
+)
 
 set(PYTHON_COMMON_SOURCES
     ${DYNLOAD_SOURCES}
@@ -372,11 +366,7 @@ foreach(ext ${builtin_extensions})
     set(config_entries "${config_entries}    {\"${ext}\", ${init_prefix_${PY_VERSION_MAJOR}}${ext}},\n")
 endforeach()
 
-if(PY_VERSION VERSION_GREATER_EQUAL "3.7")
-    set(PyInit_imp "PyInit__imp")
-else()
-    set(PyInit_imp "PyInit_imp")
-endif()
+set(PyInit_imp "PyInit__imp")
 
 configure_file(
     ${PROJECT_SOURCE_DIR}/cmake/config_${PY_VERSION_MAJOR}.c.in
@@ -390,28 +380,18 @@ set(LIBPYTHON_TARGET_LIBRARIES
 if(HAVE_LIBDL)
   list(APPEND LIBPYTHON_TARGET_LIBRARIES ${HAVE_LIBDL})
 endif()
-if(WITH_THREAD OR PY_VERSION VERSION_GREATER_EQUAL "3.7")
-    list(APPEND LIBPYTHON_TARGET_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-endif()
+list(APPEND LIBPYTHON_TARGET_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 if(UNIX)
     list(APPEND LIBPYTHON_TARGET_LIBRARIES ${LIBUTIL_LIBRARIES} ${M_LIBRARIES})
 endif()
 if(WIN32)
     list(APPEND LIBPYTHON_TARGET_LIBRARIES ws2_32) # Required by signalmodule
-    if(PY_VERSION VERSION_GREATER_EQUAL "3.5")
-        list(APPEND LIBPYTHON_TARGET_LIBRARIES version) # Required by sysmodule
-    endif()
-    if(PY_VERSION VERSION_GREATER_EQUAL "3.6")
-        list(APPEND LIBPYTHON_TARGET_LIBRARIES shlwapi) # Required by PC/getpathp
-    endif()
-    if(PY_VERSION VERSION_GREATER_EQUAL "3.9")
-        list(APPEND LIBPYTHON_TARGET_LIBRARIES pathcch)
-    endif()
+    list(APPEND LIBPYTHON_TARGET_LIBRARIES version) # Required by sysmodule
+    list(APPEND LIBPYTHON_TARGET_LIBRARIES shlwapi) # Required by PC/getpathp
+    list(APPEND LIBPYTHON_TARGET_LIBRARIES pathcch)
 endif()
 
 set(LIBPYTHON_FROZEN_SOURCES )
-if(IS_PY3)
-
 # Build _freeze_importlib executable
 add_executable(_freeze_importlib
   ${SRC_DIR}/Programs/_freeze_module.c
@@ -427,11 +407,9 @@ set(LIBPYTHON_FROZEN_SOURCES
   ${SRC_DIR}/Python/importlib_external.h
   ${SRC_DIR}/Python/importlib.h
 )
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-  list(APPEND LIBPYTHON_FROZEN_SOURCES
+list(APPEND LIBPYTHON_FROZEN_SOURCES
     ${SRC_DIR}/Python/importlib_zipimport.h
-  )
-endif()
+)
 add_custom_command(
   OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
   COMMAND
@@ -449,25 +427,21 @@ add_custom_command(
     ${SRC_DIR}/Lib/importlib/_bootstrap_external.py
     ${SRC_DIR}/Lib/importlib/_bootstrap.py
 )
-if(PY_VERSION VERSION_GREATER_EQUAL "3.8")
-  add_custom_command(
+add_custom_command(
     OUTPUT ${LIBPYTHON_FROZEN_SOURCES}
     COMMAND
-      ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
+        ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:_freeze_importlib>
         zipimport
         ${SRC_DIR}/Lib/zipimport.py
         ${SRC_DIR}/Python/importlib_zipimport.h
     DEPENDS
-      ${SRC_DIR}/Lib/zipimport.py
+        ${SRC_DIR}/Lib/zipimport.py
     APPEND
-  )
-endif()
+)
 
 # This is a convenience target allowing to regenerate
 # the frozen sources.
 add_custom_target(freeze_modules DEPENDS ${LIBPYTHON_FROZEN_SOURCES})
-
-endif()
 
 # Collect libpython sources
 set(LIBPYTHON_SOURCES
